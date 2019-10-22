@@ -8,6 +8,7 @@ import math
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, TransformStamped, Point
 from visualization_msgs.msg import Marker
+from std_msgs.msg import Float64
 
 from skidpad import Skidpad
 
@@ -123,6 +124,7 @@ if __name__ == '__main__':
 
     path_pub = rospy.Publisher('path', Path, queue_size=1)
     marker_pub = rospy.Publisher('skidpad', Marker, queue_size=1)
+    s_pub = rospy.Publisher('s', Float64, queue_size=1)
 
     tf_buffer = tf2_ros.Buffer()
     tf2_ros.TransformListener(tf_buffer)
@@ -158,6 +160,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
 
         marker_pub.publish(marker)
+        s_pub.publish(s)
 
         try:
             trans = tf_buffer.lookup_transform(SKIDPAD_FRAME,
@@ -168,7 +171,6 @@ if __name__ == '__main__':
             y = trans.transform.translation.y
 
             s = skidpad.find_s(s, x, y)
-            rospy.loginfo(s)
 
             # Generate and publish path
             path = generate_path_msg(skidpad, s, offsets)
