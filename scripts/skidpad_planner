@@ -1,0 +1,150 @@
+#!/usr/bin/env python
+
+import rospy
+import tf2_ros
+import tf
+import math
+
+from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped, TransformStamped, Point
+
+from skidpad import Skidpad
+
+MAP_FRAME = 'map'
+SKIDPAD_FRAME = 'skidpad'
+VEHICLE_FRAME = 'base_link'
+
+PUBLISH_RATE = 5
+
+x_skidpad = None
+y_skidpad = None
+yaw_skidpad = None
+
+def reset_skidpad(a, x_vehicle, y_vehicle, yaw_vehicle):
+    global x_skidpad, y_skidpad, yaw_skidpad
+
+    # Map -> Skidpad 
+
+    x_skidpad = x_vehicle - a * math.sin(yaw_vehicle)
+    y_skidpad = y_vehicle + a * math.cos(yaw_vehicle)
+    yaw_skidpad = yaw_vehicle
+
+def broadcast_skidpad():
+    broadcaster = tf2_ros.StaticTransformBroadcaster()
+    transform_stamped = TransformStamped()
+
+    transform_stamped.header.stamp = rospy.Time.now()
+    transform_stamped.header.frame_id = MAP_FRAME
+    transform_stamped.child_frame_id = SKIDPAD_FRAME
+
+    # Translation
+    transform_stamped.transform.translation.x = x_skidpad
+    transform_stamped.transform.translation.y = y_skidpad
+
+    # Rotation
+    quat = tf.transformations.quaternion_from_euler(0, 0, yaw_skidpad)
+    transform_stamped.transform.rotation.x = quat[0]
+    transform_stamped.transform.rotation.y = quat[1]
+    transform_stamped.transform.rotation.z = quat[2]
+    transform_stamped.transform.rotation.w = quat[3]
+
+    broadcaster.sendTransform(transform_stamped)
+
+def generate_path_msg(skidpad, base_s, offsets):
+    path = Path()
+    path.header.frame_id = SKIDPAD_FRAME 
+
+    for delta_s in offsets:
+        s = base_s + delta_s
+        x = skidpad.x(s)
+        y = skidpad.y(s)
+
+        pose = PoseStamped()
+        pose.header.frame_id = SKIDPAD_FRAME
+        pose.pose.position = Point(x, y, 0)
+        
+        path.poses.append(pose)
+
+    return path
+
+if __name__ == '__main__':
+    rospy.init_node('skidpad_planner')
+
+    # Skidpad parameters
+    R = rospy.get_param('~/skidpad/R', 5.0)
+    a = rospy.get_param('~/skidpad/a', 5.0)
+    b = rospy.get_param('~/skidpad/b', 5.0)
+
+
+    skidpad = Skidpad(R, a, b)
+
+    # Path generation parameters
+    path_start = rospy.get_param('~/path/start', -1.0)
+    path_stop  = rospy.get_param('~/path/stop', 2.5)
+    path_step  = rospy.get_param('~/path/step', 0.25)
+
+    if path_start > path_stop:
+        rospy.logerr("Stop offset can't be smaller than start.")
+        exit()
+
+    if path_step == 0:
+        rospy.logerr("Step can't be zero")
+        exit()
+
+    offset = path_start
+    offsets = [] 
+    while offset <= path_stop:
+        offsets.append(offset)
+        offset += path_step
+
+    path_pub = rospy.Publisher('path', Path, queue_size=1)
+
+    tf_buffer = tf2_ros.Buffer()
+    tf2_ros.TransformListener(tf_buffer)
+
+    trans = tf_buffer.lookup_transform(VEHICLE_FRAME,
+                                       MAP_FRAME,
+                                       rospy.Time(0),
+                                       rospy.Duration(3.0))
+
+    x = trans.transform.translation.x
+    y = trans.transform.translation.y
+    
+    quat = [
+        trans.transform.rotation.x,
+        trans.transform.rotation.y,
+        trans.transform.rotation.z,
+        trans.transform.rotation.w
+    ]
+
+    roll, pitch, yaw = tf.transformations.euler_from_quaternion(quat)
+
+    reset_skidpad(a, x, y, yaw)
+    broadcast_skidpad()
+
+    s = 0
+
+    rate = rospy.Rate(PUBLISH_RATE)
+    while not rospy.is_shutdown():
+
+        try:
+            trans = tf_buffer.lookup_transform(SKIDPAD_FRAME,
+                                               VEHICLE_FRAME,
+                                               rospy.Time(0))
+           
+            x = trans.transform.translation.x
+            y = trans.transform.translation.y
+
+            s = skidpad.find_s(s, x, y)
+            rospy.loginfo(s)
+
+            # Generate and publish path
+            path = generate_path_msg(skidpad, s, offsets)
+            path_pub.publish(path)
+
+        except (tf2_ros.LookupException,
+                tf2_ros.ConnectivityException,
+                tf2_ros.ExtrapolationException):
+            rospy.logwarn('Transform lookup failed')
+        
+        rate.sleep()
