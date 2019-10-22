@@ -7,6 +7,7 @@ import math
 
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, TransformStamped, Point
+from visualization_msgs.msg import Marker
 
 from skidpad import Skidpad
 
@@ -28,6 +29,30 @@ def reset_skidpad(a, x_vehicle, y_vehicle, yaw_vehicle):
     x_skidpad = x_vehicle - a * math.sin(yaw_vehicle)
     y_skidpad = y_vehicle + a * math.cos(yaw_vehicle)
     yaw_skidpad = yaw_vehicle
+
+def generate_visualization_msg(skidpad, s_start, s_end, s_step):
+    marker = Marker()
+
+    marker.header.frame_id = 'skidpad'
+    marker.header.stamp = rospy.Time.now()
+
+    marker.type = Marker.LINE_STRIP
+
+    # Define style of the line strip
+    marker.scale.x = 0.1
+    marker.color.g = 1.0
+    marker.color.a = 1.0
+
+    s = s_start
+    while (s < s_end):
+        x = skidpad.x(s)
+        y = skidpad.y(s)
+
+        marker.points.append(Point(x, y, 0))
+
+        s += s_step
+
+    return marker
 
 def broadcast_skidpad():
     broadcaster = tf2_ros.StaticTransformBroadcaster()
@@ -97,6 +122,7 @@ if __name__ == '__main__':
         offset += path_step
 
     path_pub = rospy.Publisher('path', Path, queue_size=1)
+    marker_pub = rospy.Publisher('skidpad', Marker, queue_size=1)
 
     tf_buffer = tf2_ros.Buffer()
     tf2_ros.TransformListener(tf_buffer)
@@ -121,10 +147,17 @@ if __name__ == '__main__':
     reset_skidpad(a, x, y, yaw)
     broadcast_skidpad()
 
+    skidpad_length = a + b + 8*math.pi*R
+    marker = generate_visualization_msg(skidpad,
+                                        0.0, skidpad_length,
+                                        skidpad_length * 1e-3)
+
     s = 0
 
     rate = rospy.Rate(PUBLISH_RATE)
     while not rospy.is_shutdown():
+
+        marker_pub.publish(marker)
 
         try:
             trans = tf_buffer.lookup_transform(SKIDPAD_FRAME,
