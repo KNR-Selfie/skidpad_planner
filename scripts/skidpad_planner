@@ -75,7 +75,6 @@ if __name__ == '__main__':
     a = rospy.get_param('~/skidpad/a', 5.0)
     b = rospy.get_param('~/skidpad/b', 5.0)
 
-
     skidpad = Skidpad(R, a, b)
 
     # Path generation parameters
