@@ -27,9 +27,9 @@ def reset_skidpad(a, x_vehicle, y_vehicle, yaw_vehicle):
 
     # Map -> Skidpad 
 
-    x_skidpad = x_vehicle - a * math.sin(yaw_vehicle)
-    y_skidpad = y_vehicle + a * math.cos(yaw_vehicle)
-    yaw_skidpad = yaw_vehicle
+    x_skidpad = x_vehicle + a * math.cos(yaw_vehicle)
+    y_skidpad = y_vehicle + a * math.sin(yaw_vehicle)
+    yaw_skidpad = yaw_vehicle - math.pi / 2
 
 def generate_visualization_msg(skidpad, s_start, s_end, s_step):
     marker = Marker()

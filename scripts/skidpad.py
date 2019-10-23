@@ -88,7 +88,7 @@ class Skidpad:
 
     def find_d(self, s, x, y):
         if s < self.s_01_:
-            return y
+            return -x
 
         elif s < self.s_05_:
             dx = x - self.R_
@@ -106,4 +106,4 @@ class Skidpad:
 
             return self.R_ - r 
 
-        else: return y
+        else: return -x
