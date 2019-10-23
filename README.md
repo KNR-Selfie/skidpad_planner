@@ -10,9 +10,9 @@ Przy uruchomieniu węzeł `skidpad_planner` generuje za każdym razem trasę w t
 ## `skidpad_planer`
 
 ## Published topics
-`path`([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html)) Najbliższy aktualny odcinek ścieżki, publikowany w układzie współrzędnych `skidpad`. Do stosowania bezpośrednio na wejście systemu sterowania. **Nie wymagane jest dodatkowe stosowanie paczki `path_extractor`.**
+`path`([nav_msgs/Path](http://docs.ros.org/api/nav_msgs/html/msg/Path.html)) Najbliższy aktualny odcinek ścieżki, publikowany w układzie współrzędnych `skidpad`. Do stosowania bezpośrednio na wejście systemu sterowania. **Nie wymagane jest dodatkowe stosowanie paczki `path_extractor`.**
 
-`skidpad`([visualization_msgs/Marker](http://docs.ros.org/api/std_msgs/html/msg/Float64.html)) Wizualizacja wygenerowanej trasy.
+`skidpad`([visualization_msgs/Marker](docs.ros.org/api/visualization_msgs/html/msg/Marker.html)) Wizualizacja wygenerowanej trasy.
 
 `s` ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html)) Postęp na trasie (w metrach).
 
