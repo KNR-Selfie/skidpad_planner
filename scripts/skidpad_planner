@@ -125,6 +125,7 @@ if __name__ == '__main__':
     path_pub = rospy.Publisher('path', Path, queue_size=1)
     marker_pub = rospy.Publisher('skidpad', Marker, queue_size=1)
     s_pub = rospy.Publisher('s', Float64, queue_size=1)
+    d_pub = rospy.Publisher('d', Float64, queue_size=1)
 
     tf_buffer = tf2_ros.Buffer()
     tf2_ros.TransformListener(tf_buffer)
@@ -160,7 +161,6 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
 
         marker_pub.publish(marker)
-        s_pub.publish(s)
 
         try:
             trans = tf_buffer.lookup_transform(SKIDPAD_FRAME,
@@ -170,7 +170,12 @@ if __name__ == '__main__':
             x = trans.transform.translation.x
             y = trans.transform.translation.y
 
+            # Calculate Frenet coordinates
             s = skidpad.find_s(s, x, y)
+            d = skidpad.find_d(x, x, y)
+
+            s_pub.publish(s)
+            d_pub.publish(d)
 
             # Generate and publish path
             path = generate_path_msg(skidpad, s, offsets)

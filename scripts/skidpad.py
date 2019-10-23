@@ -85,3 +85,25 @@ class Skidpad:
             return s
         else:
             return self.find_s(s, x, y)
+
+    def find_d(self, s, x, y):
+        if s < self.s_01_:
+            return y
+
+        elif s < self.s_05_:
+            dx = x - self.R_
+            dy = y
+
+            r = math.sqrt(dx**2 + dy**2)
+
+            return r - self.R_
+
+        elif s < self.s_09_:
+            dx = x + self.R_
+            dy = y
+
+            r = math.sqrt(dx**2 + dy**2)
+
+            return self.R_ - r 
+
+        else: return y

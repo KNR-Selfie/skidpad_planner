@@ -16,6 +16,8 @@ Przy uruchomieniu węzeł `skidpad_planner` generuje za każdym razem trasę w t
 
 `s` ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html)) Postęp na trasie (w metrach).
 
+`d` ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html)) Odchylenie (w metrach). Przyjmuje wartość dodatnią gdy pojazd znajduje się na lewo od ścieżki.
+
 # Parameters
 
 ## Track dimensions
