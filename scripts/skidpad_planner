@@ -122,7 +122,7 @@ if __name__ == '__main__':
         offsets.append(offset)
         offset += path_step
 
-    path_pub = rospy.Publisher('path', Path, queue_size=1)
+    path_pub = rospy.Publisher('closest_path_points', Path, queue_size=1)
     marker_pub = rospy.Publisher('skidpad', Marker, queue_size=1)
     s_pub = rospy.Publisher('s', Float64, queue_size=1)
     d_pub = rospy.Publisher('d', Float64, queue_size=1)
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     trans = tf_buffer.lookup_transform(VEHICLE_FRAME,
                                        MAP_FRAME,
                                        rospy.Time(0),
-                                       rospy.Duration(3.0))
+                                       rospy.Duration(10.0))
 
     x = trans.transform.translation.x
     y = trans.transform.translation.y
