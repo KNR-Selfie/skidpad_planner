@@ -12,11 +12,12 @@ from std_msgs.msg import Float64
 
 from skidpad import Skidpad
 
+PATH_TOPIC = 'closest_path_points'
 MAP_FRAME = 'map'
 SKIDPAD_FRAME = 'skidpad'
 VEHICLE_FRAME = 'base_link'
 
-PUBLISH_RATE = 5
+PUBLISH_RATE = 10
 
 x_skidpad = None
 y_skidpad = None
@@ -122,10 +123,10 @@ if __name__ == '__main__':
         offsets.append(offset)
         offset += path_step
 
-    path_pub = rospy.Publisher('closest_path_points', Path, queue_size=1)
+    path_pub = rospy.Publisher(PATH_TOPIC, Path, queue_size=1)
     marker_pub = rospy.Publisher('skidpad', Marker, queue_size=1)
-    s_pub = rospy.Publisher('s', Float64, queue_size=1)
-    d_pub = rospy.Publisher('d', Float64, queue_size=1)
+    s_pub = rospy.Publisher('track_progress', Float64, queue_size=1)
+    d_pub = rospy.Publisher('deviation', Float64, queue_size=1)
 
     tf_buffer = tf2_ros.Buffer()
     tf2_ros.TransformListener(tf_buffer)
@@ -180,6 +181,7 @@ if __name__ == '__main__':
             # Generate and publish path
             path = generate_path_msg(skidpad, s, offsets)
             path_pub.publish(path)
+           #print('path published')
 
         except (tf2_ros.LookupException,
                 tf2_ros.ConnectivityException,
