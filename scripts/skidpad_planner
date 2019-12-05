@@ -41,7 +41,7 @@ def generate_visualization_msg(skidpad, s_start, s_end, s_step):
     marker.type = Marker.LINE_STRIP
 
     # Define style of the line strip
-    marker.scale.x = 0.1
+    marker.scale.x = 0.01
     marker.color.g = 1.0
     marker.color.a = 1.0
 
