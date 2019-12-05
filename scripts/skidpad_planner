@@ -130,8 +130,8 @@ if __name__ == '__main__':
     tf_buffer = tf2_ros.Buffer()
     tf2_ros.TransformListener(tf_buffer)
 
-    trans = tf_buffer.lookup_transform(VEHICLE_FRAME,
-                                       MAP_FRAME,
+    trans = tf_buffer.lookup_transform(MAP_FRAME,
+                                       VEHICLE_FRAME,
                                        rospy.Time(0),
                                        rospy.Duration(3.0))
 
