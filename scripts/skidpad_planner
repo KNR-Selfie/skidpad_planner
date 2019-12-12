@@ -25,7 +25,7 @@ yaw_skidpad = None
 def reset_skidpad(a, x_vehicle, y_vehicle, yaw_vehicle):
     global x_skidpad, y_skidpad, yaw_skidpad
 
-    # Map -> Skidpad 
+    # Map -> Skidpad
 
     x_skidpad = x_vehicle + a * math.cos(yaw_vehicle)
     y_skidpad = y_vehicle + a * math.sin(yaw_vehicle)
@@ -78,7 +78,7 @@ def broadcast_skidpad():
 
 def generate_path_msg(skidpad, base_s, offsets):
     path = Path()
-    path.header.frame_id = SKIDPAD_FRAME 
+    path.header.frame_id = SKIDPAD_FRAME
 
     for delta_s in offsets:
         s = base_s + delta_s
@@ -88,7 +88,7 @@ def generate_path_msg(skidpad, base_s, offsets):
         pose = PoseStamped()
         pose.header.frame_id = SKIDPAD_FRAME
         pose.pose.position = Point(x, y, 0)
-        
+
         path.poses.append(pose)
 
     return path
@@ -97,16 +97,16 @@ if __name__ == '__main__':
     rospy.init_node('skidpad_planner')
 
     # Skidpad parameters
-    R = rospy.get_param('~/skidpad/R', 5.0)
-    a = rospy.get_param('~/skidpad/a', 5.0)
-    b = rospy.get_param('~/skidpad/b', 5.0)
+    R = rospy.get_param('~skidpad/R', 5.0)
+    a = rospy.get_param('~skidpad/a', 5.0)
+    b = rospy.get_param('~skidpad/b', 5.0)
 
     skidpad = Skidpad(R, a, b)
 
     # Path generation parameters
-    path_start = rospy.get_param('~/path/start', -1.0)
-    path_stop  = rospy.get_param('~/path/stop', 2.5)
-    path_step  = rospy.get_param('~/path/step', 0.25)
+    path_start = rospy.get_param('~path/start', -1.0)
+    path_stop  = rospy.get_param('~path/stop', 2.5)
+    path_step  = rospy.get_param('~path/step', 0.25)
 
     if path_start > path_stop:
         rospy.logerr("Stop offset can't be smaller than start.")
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         exit()
 
     offset = path_start
-    offsets = [] 
+    offsets = []
     while offset <= path_stop:
         offsets.append(offset)
         offset += path_step
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     x = trans.transform.translation.x
     y = trans.transform.translation.y
-    
+
     quat = [
         trans.transform.rotation.x,
         trans.transform.rotation.y,
@@ -166,7 +166,7 @@ if __name__ == '__main__':
             trans = tf_buffer.lookup_transform(SKIDPAD_FRAME,
                                                VEHICLE_FRAME,
                                                rospy.Time(0))
-           
+
             x = trans.transform.translation.x
             y = trans.transform.translation.y
 
@@ -185,5 +185,5 @@ if __name__ == '__main__':
                 tf2_ros.ConnectivityException,
                 tf2_ros.ExtrapolationException):
             rospy.logwarn('Transform lookup failed')
-        
+
         rate.sleep()
