@@ -45,17 +45,13 @@ class Skidpad:
         return 0
 
     def y(self, s):
-
-        if s < self.s_00_: return -self.a_
         if s < self.s_01_: return s - self.a_
 
         if s < self.s_09_:
             delta_s = s - self.s_01_
             return self.R_ * math.sin(delta_s / self.R_)
 
-        if s < self.s_10_: return s - self.s_09_
-
-        return self.b_
+        return s - self.s_09_
 
     def find_s(self, prev_s, x, y):
         if prev_s < self.s_01_:
@@ -104,6 +100,6 @@ class Skidpad:
 
             r = math.sqrt(dx**2 + dy**2)
 
-            return self.R_ - r 
+            return self.R_ - r
 
         else: return -x
